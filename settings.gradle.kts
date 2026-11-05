@@ -15,6 +15,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Crun:C"
+rootProject.name = "Crun-C"
 
 include(":app")
