@@ -1,3 +1,4 @@
+
 package com.crun.commandsrun
 
 import android.os.Bundle
@@ -12,18 +13,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!Python.isStarted()) {
+            Python.start(AndroidPlatform(this))
+        }
+
         setContent {
-            CrunApp()
+            CrunApp(
+                onRun = { code ->
+                    try {
+                        val python = Python.getInstance()
+                        val module = python.getModule("main")
+                        module.callAttr("run_code", code).toString()
+                    } catch (error: Exception) {
+                        "Python error: ${error.message}"
+                    }
+                }
+            )
         }
     }
 }
 
 @Composable
-fun CrunApp() {
+fun CrunApp(onRun: (String) -> String) {
     var code by remember {
         mutableStateOf("print(\"Hello, Crun:C!\")")
     }
@@ -65,7 +83,7 @@ fun CrunApp() {
 
             Button(
                 onClick = {
-                    output = "Execution server not connected yet."
+                    output = onRun(code)
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF238636)
